@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clawd 夜海航行</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #060e1c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: min(82vmin, 720px);
+    height: auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 10px;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.7);
+  }
+  .info { color: #1a2840; font-size: 11px; margin-top: 10px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="720" height="720"></canvas>
+<div class="info" id="info">clawd 夜海航行</div>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const BASE_GRID_W = 144, BASE_GRID_H = 144;
+const CANVAS_SCALE = 1.25;
+const GRID_W = Math.round(BASE_GRID_W * CANVAS_SCALE);
+const GRID_H = Math.round(BASE_GRID_H * CANVAS_SCALE);
+const SCENE_OFFSET_X = Math.floor((GRID_W - BASE_GRID_W) / 2);
+const SCENE_OFFSET_Y = Math.floor((GRID_H - BASE_GRID_H) / 2);
+const SP = 4;
+
+cv.width = GRID_W * SP;
+cv.height = GRID_H * SP;
+
+
+const C = {
+  skyDeep:'#07111f', skyMid:'#0a1828', skyHorizon:'#0e2035',
+  moonSpark:'#f1f5d6', moonCore:'#dde8c0', moonMid:'#c8d8a8', moonDim:'#8a9870', moonShadow:'#6c7757', moonGlow:'#21384d',
+  starBright:'#e8f4ff', starMid:'#90b8d8', starDim:'#4a6880',
+  seaDeep:'#071820', seaMid:'#0a2030', seaLayer1:'#0e2c3c', seaLayer2:'#123240',
+  seaFoam:'#1a4858', seaShimmer:'#2a6070',
+  reflBright:'#1e4a5a', reflMid:'#163848',
+  boatRim:'#a07848', boatPlank:'#7a5430', boatHull:'#5a3c20', boatDark:'#3a2410',
+  boatTexA:'#6a4828', boatTexB:'#8a6038',
+  mastWood:'#6a4820', flagRed:'#cc3333', flagLight:'#ee5555',
+  clawdBody:'#CD6E58', clawdEye:'#000000',
+};
+
+function spx(sx,sy,col){ctx.fillStyle=col;ctx.fillRect(sx*SP,sy*SP,SP,SP);}
+function sRect(sx,sy,sw,sh,col){ctx.fillStyle=col;ctx.fillRect(sx*SP,sy*SP,sw*SP,sh*SP);}
+function spxTo(target,sx,sy,col){target.fillStyle=col;target.fillRect(sx*SP,sy*SP,SP,SP);}
+
+function clamp(v,min=0,max=1){return Math.max(min,Math.min(max,v));}
+function lerp(a,b,t){return a+(b-a)*t;}
+function smooth01(t){return t*t*(3-2*t);}
+function smoothstep(edge0,edge1,x){
+  const t=clamp((x-edge0)/(edge1-edge0));
+  return smooth01(t);
+}
+function hexToRgb(hex){
+  const clean=hex.replace('#','');
+  return [
+    parseInt(clean.slice(0,2),16),
+    parseInt(clean.slice(2,4),16),
+    parseInt(clean.slice(4,6),16),
+  ];
+}
+function mixRgb(a,b,t){
+  const p=clamp(t);
+  return [
+    Math.round(lerp(a[0],b[0],p)),
+    Math.round(lerp(a[1],b[1],p)),
+    Math.round(lerp(a[2],b[2],p)),
+  ];
+}
+function shadeRgb(rgb,amount){
+  return amount>=0?mixRgb(rgb,[255,255,255],amount):mixRgb(rgb,[0,0,0],-amount);
+}
+function rgbToCss(rgb){return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;}
+function colorAt(stops,t){
+  const p=clamp(t);
+  for(let i=1;i<stops.length;i++){
+    const[aPos,aCol]=stops[i-1];
+    const[bPos,bCol]=stops[i];
+    if(p<=bPos){
+      return mixRgb(aCol,bCol,smoothstep(aPos,bPos,p));
+    }
+  }
+  return stops[stops.length-1][1];
+}
+function hash2(x,y){
+  const n=Math.sin(x*127.1+y*311.7+91.7)*43758.5453123;
+  return n-Math.floor(n);
+}
+function valueNoise(x,y,scale){
+  const nx=x/scale,ny=y/scale;
+  const ix=Math.floor(nx),iy=Math.floor(ny);
+  const fx=nx-ix,fy=ny-iy;
+  const ux=smooth01(fx),uy=smooth01(fy);
+  const a=hash2(ix,iy),b=hash2(ix+1,iy),c=hash2(ix,iy+1),d=hash2(ix+1,iy+1);
+  const top=lerp(a,b,ux);
+  const bottom=lerp(c,d,ux);
+  return lerp(top,bottom,uy);
+}
+function fbm(x,y,scales){
+  let total=0,weight=0,amp=1;
+  for(const scale of scales){
+    total+=valueNoise(x,y,scale)*amp;
+    weight+=amp;
+    amp*=0.55;
+  }
+  return total/weight;
+}
+
+const RGB={
+  skyDeep:hexToRgb(C.skyDeep),
+  skyMid:hexToRgb(C.skyMid),
+  skyHorizon:hexToRgb(C.skyHorizon),
+  moonSpark:hexToRgb(C.moonSpark),
+  moonCore:hexToRgb(C.moonCore),
+  moonMid:hexToRgb(C.moonMid),
+  moonDim:hexToRgb(C.moonDim),
+  moonShadow:hexToRgb(C.moonShadow),
+  moonGlow:hexToRgb(C.moonGlow),
+  starBright:hexToRgb(C.starBright),
+  starMid:hexToRgb(C.starMid),
+  starDim:hexToRgb(C.starDim),
+  seaDeep:hexToRgb(C.seaDeep),
+  seaMid:hexToRgb(C.seaMid),
+  seaLayer1:hexToRgb(C.seaLayer1),
+  seaLayer2:hexToRgb(C.seaLayer2),
+  seaFoam:hexToRgb(C.seaFoam),
+  seaShimmer:hexToRgb(C.seaShimmer),
+  reflBright:hexToRgb(C.reflBright),
+  reflMid:hexToRgb(C.reflMid),
+};
+
+const skyLayer=document.createElement('canvas');
+const seaLayer=document.createElement('canvas');
+skyLayer.width=seaLayer.width=cv.width;
+skyLayer.height=seaLayer.height=cv.height;
+const skyLayerCtx=skyLayer.getContext('2d');
+const seaLayerCtx=seaLayer.getContext('2d');
+let layersBuilt=false;
+
+const BASE_SEA_Y = 86;
+const SEA_Y = BASE_SEA_Y + SCENE_OFFSET_Y;
+const SKY_H = SEA_Y;
+
+const MOON_CX = Math.floor(BASE_GRID_W/2) + SCENE_OFFSET_X;  // 水平居中
+const MOON_CY = 18 + SCENE_OFFSET_Y;
+const MOON_R = 8;
+// 预生成几个环形山（相对月心偏移 dx, dy，半径 cr）
+const MOON_CRATERS = [
+  [-3,-1, 1.2],
+  [ 2, 0, 1.6],
+  [-1, 3, 1.0],
+  [ 3,-3, 0.9],
+  [ 0, 1, 0.7],
+  [-4, 2, 0.8],
+];
+
+function drawSky(){
+  buildLayers();
+  ctx.drawImage(skyLayer,0,0);
+}
+
+function buildLayers(){
+  if(layersBuilt) return;
+  buildSkyLayer();
+  buildSeaLayer();
+  layersBuilt=true;
+}
+
+function buildSkyLayer(){
+  const moonX=MOON_CX;
+  const moonY=MOON_CY;
+  const skyStops=[
+    [0,RGB.skyDeep],
+    [0.58,RGB.skyMid],
+    [1,RGB.skyHorizon],
+  ];
+  for(let sy=0;sy<SKY_H;sy++){
+    const v=sy/Math.max(1,SKY_H-1);
+    for(let sx=0;sx<GRID_W;sx++){
+      const base=colorAt(skyStops,v);
+      const cloudMass=fbm(sx+14,sy+8,[48,24,12]);
+      const veil=fbm(sx*1.35+60,sy*0.92+11,[26,13,7]);
+      const bandCloud=fbm(sx*1.12+42,sy*0.84+17,[40,20,10]);
+      const bandBreak=fbm(sx*1.58+91,sy*0.68+31,[28,14,7]);
+      const grain=hash2(sx,sy)-0.5;
+      const edgeShade=smoothstep(0.45,1,Math.abs((sx/(GRID_W-1))*2-1));
+      const moonAura=Math.max(0,1-Math.hypot((sx-moonX)/24,(sy-moonY)/18));
+      const bandAxis=((sy-(moonY+18))*0.96)-((sx-moonX)*0.34);
+      const bandMask=clamp(1-Math.abs(bandAxis)/16)
+        *smoothstep(moonY+4,SKY_H*0.82,sy)
+        *(1-smoothstep(SKY_H*0.88,SKY_H,sy)*0.45);
+      const thinBand=bandMask*smoothstep(0.44,0.76,bandCloud)*(0.58+0.42*(1-bandBreak));
+      const moonScatter=Math.max(0,1-Math.hypot((sx-moonX)/20,((sy-(moonY+15))/13)));
+      const horizonMist=smoothstep(0.72,1,v)*(0.86-edgeShade*0.28);
+      const openPocket=Math.max(0,1-Math.hypot((sx-(moonX+36))/42,((sy-(moonY+24))/18)));
+      let shade=(cloudMass-0.5)*0.15+(veil-0.5)*0.08+grain*0.03;
+      shade-=edgeShade*0.07;
+      shade+=moonAura*0.08;
+      shade-=thinBand*0.06;
+      shade+=thinBand*moonScatter*0.18;
+      shade+=horizonMist*0.055;
+      shade-=openPocket*0.045;
+      spxTo(skyLayerCtx,sx,sy,rgbToCss(shadeRgb(base,shade)));
+    }
+  }
+}
+
+function drawMoon(f){
+  const mcx=MOON_CX, mcy=MOON_CY, r=MOON_R;
+  const breathWave=Math.sin(f*0.12);
+  const breath=0.5+0.5*breathWave;
+  const haloInner=r+0.25+breath*0.2;
+  const haloOuter=r+4.9+breath*1.3;
+
+  // 外圈辉光：做成轻微呼吸，外淡内亮，避免硬邦邦一圈
+  for(let sy=Math.floor(mcy-haloOuter);sy<=Math.ceil(mcy+haloOuter);sy++){
+    for(let sx=Math.floor(mcx-haloOuter);sx<=Math.ceil(mcx+haloOuter);sx++){
+      const d=Math.hypot(sx-mcx,sy-mcy);
+      if(d<=r+0.08||d>=haloOuter) continue;
+      const haloT=1-clamp((d-haloInner)/Math.max(0.9,haloOuter-haloInner));
+      const haloBias=0.74+smoothstep(r+0.45,r+1.8,d)*0.26;
+      const haloRgb=shadeRgb(RGB.moonGlow,haloT*(0.22+breath*0.12)*haloBias-0.05);
+      spx(sx,sy,rgbToCss(haloRgb));
+    }
+  }
+
+  // 月盘本体：轻微修正轮廓和明暗，让像素月亮更圆更饱满
+  for(let sy=mcy-r;sy<=mcy+r;sy++){
+    for(let sx=mcx-r;sx<=mcx+r;sx++){
+      const dx=sx-mcx, dy=sy-mcy;
+      const d=Math.hypot((dx+0.08)/1.02,(dy-0.04)/0.98);
+      if(d>r+0.08) continue;
+
+      const nx=(dx+0.35)/r;
+      const ny=(dy+0.04)/r;
+      const nz=Math.sqrt(Math.max(0,1-nx*nx-ny*ny));
+      const lambert=nx*-0.7+ny*-0.5+nz*0.54;
+      const faceBias=(-dx*0.36-dy*0.52)/(r*1.62);
+      const centerLift=(1-d/Math.max(1,r))*0.08;
+      const tone=lambert*0.72+faceBias*0.28+centerLift;
+      let col;
+      if(tone>0.52) col=C.moonSpark;
+      else if(tone>0.2) col=C.moonCore;
+      else if(tone>-0.08) col=C.moonMid;
+      else if(tone>-0.32) col=C.moonDim;
+      else col=C.moonShadow;
+
+      if(d>r-1.2&&col===C.moonShadow) col=C.moonDim;
+      if(d>r-0.85&&tone>0.05) col=C.moonSpark;
+      else if(d>r-0.45&&tone<-0.12) col=C.moonDim;
+      spx(sx,sy,col);
+    }
+  }
+
+  // 环形山：有一点亮边和阴影，别只剩几块死黑斑
+  const moonScale=r/7;
+  for(const [cdx,cdy,cr] of MOON_CRATERS){
+    const craterR=cr*moonScale;
+    const ccx=mcx+cdx*moonScale, ccy=mcy+cdy*moonScale;
+    for(let sy=Math.floor(ccy-craterR);sy<=Math.ceil(ccy+craterR);sy++){
+      for(let sx=Math.floor(ccx-craterR);sx<=Math.ceil(ccx+craterR);sx++){
+        const dx=sx-ccx, dy=sy-ccy;
+        const craterD=Math.hypot(dx,dy);
+        if(craterD>craterR) continue;
+        const dm=Math.hypot(sx-mcx,sy-mcy);
+        if(dm>r-1.45) continue;
+
+        const craterLight=(-dx*0.7-dy*0.55)/(Math.max(0.8,craterR)*1.4);
+        let craterCol;
+        if(craterD>craterR-0.45) craterCol=craterLight>0.08?C.moonCore:C.moonDim;
+        else if(craterD<craterR*0.52) craterCol=craterLight>-0.04?C.moonDim:C.moonShadow;
+        else craterCol=craterLight>0.12?C.moonMid:C.moonShadow;
+        spx(sx,sy,craterCol);
+      }
+    }
+  }
+
+  // 月海：压一块很轻的暗面，让月面更有层次但不过度脏
+  const maria=[
+    [-2.4,1.6,2.6,1.8],
+    [2.1,-0.6,1.8,1.3],
+  ];
+  const mariaThreshold=0.58+breath*0.16;
+  for(const [ox,oy,rx,ry] of maria){
+    const mariaCx=mcx+ox*moonScale;
+    const mariaCy=mcy+oy*moonScale;
+    const mariaRx=rx*moonScale;
+    const mariaRy=ry*moonScale;
+    for(let sy=Math.floor(mariaCy-mariaRy);sy<=Math.ceil(mariaCy+mariaRy);sy++){
+      for(let sx=Math.floor(mariaCx-mariaRx);sx<=Math.ceil(mariaCx+mariaRx);sx++){
+        const ex=(sx-mariaCx)/mariaRx;
+        const ey=(sy-mariaCy)/mariaRy;
+        if(ex*ex+ey*ey>1) continue;
+        if(Math.hypot(sx-mcx,sy-mcy)>r-1.55) continue;
+        const mariaNoise=hash2(sx*0.37,sy*0.51);
+        if(mariaNoise<mariaThreshold){
+          spx(sx,sy,mariaNoise>mariaThreshold-0.08&&breath>0.58?C.moonMid:C.moonDim);
+        }
+      }
+    }
+  }
+}
+
+const STARS=[
+  [6,4,0],[18,6,1],[42,3,0],[58,8,1],[72,4,2],[88,6,0],[102,3,1],[118,7,2],[130,5,0],[142,9,1],
+  [10,14,1],[25,11,2],[38,16,0],[55,13,1],[68,18,2],[82,12,0],[96,16,1],[110,10,2],[125,15,0],[138,18,1],
+  [4,24,2],[15,20,1],[30,26,0],[48,22,2],[63,28,1],[78,24,0],[92,20,2],[108,26,1],[122,23,0],[136,28,2],
+  [8,34,0],[22,32,1],[44,36,2],[60,30,0],[76,34,1],[94,38,2],[112,32,0],[128,36,1],[140,30,2],
+  [12,44,1],[28,42,0],[50,46,2],[66,40,1],[84,44,0],[100,48,2],[116,42,1],[132,46,0],
+  [5,54,2],[20,52,0],[36,56,1],[54,50,2],[70,54,0],[86,58,1],[104,52,2],[120,56,0],[138,50,1],
+  [14,64,0],[32,62,1],[52,66,2],[68,60,0],[88,64,1],[106,68,2],[124,62,0],[140,66,1],
+  [7,74,1],[24,72,2],[46,76,0],[64,70,1],[82,74,2],[100,78,0],[118,72,1],[136,76,2],
+];
+
+function drawStars(f){
+  for(const[baseX,baseY,type]of STARS){
+    const sx=baseX+SCENE_OFFSET_X;
+    const sy=baseY+SCENE_OFFSET_Y;
+    const distMoon=Math.hypot(sx-MOON_CX,sy-MOON_CY);
+    const keepNoise=hash2(sx*0.19,sy*0.37);
+    if(distMoon<18&&keepNoise<0.86) continue;
+    if(sy>SKY_H-14&&keepNoise<0.78) continue;
+    if(sy>SKY_H-26&&keepNoise<0.42) continue;
+    const tw=Math.sin(f*0.06+sx*0.3+sy*0.4);
+    let col,bright;
+    if(type===0){col=tw>0.1?C.starBright:C.starMid;bright=tw>0.6;}
+    else if(type===1){col=tw>0?C.starMid:C.starDim;bright=tw>0.7;}
+    else{col=tw>0.3?C.starDim:C.skyMid;bright=false;}
+    const clusterA=Math.max(0,1-Math.hypot((sx-(MOON_CX-36))/18,((sy-(MOON_CY+12))/10)));
+    const clusterB=Math.max(0,1-Math.hypot((sx-(MOON_CX+42))/20,((sy-(MOON_CY+18))/11)));
+    const cluster=Math.max(clusterA,clusterB);
+    if(cluster>0.26&&keepNoise>0.52){
+      col=tw>0?C.starBright:C.starMid;
+      bright=bright||cluster>0.55;
+    }
+    spx(sx,sy,col);
+    if(bright){
+      if(sx>0)spx(sx-1,sy,C.starDim);
+      if(sx<GRID_W-1)spx(sx+1,sy,C.starDim);
+      if(sy>0)spx(sx,sy-1,C.starDim);
+    }
+  }
+}
+
+function drawSea(f){
+  buildLayers();
+  const t=f/FPS;
+  const seaH=GRID_H-SEA_Y;
+  const moonCX=MOON_CX;
+  const SEA_HIGHLIGHT=[175,195,185];
+  const SEA_LIGHT=[25,75,85];
+  const SEA_MID=[15,50,68];
+  const SEA_DARK=[10,32,48];
+  const palette=[SEA_HIGHLIGHT,SEA_LIGHT,SEA_MID,SEA_DARK];
+  const cssPalette=palette.map(rgbToCss);
+  const cells=new Uint8Array(GRID_W*seaH);
+  const idx=(sx,seaRow)=>seaRow*GRID_W+sx;
+  const setCell=(sx,sy,colorId)=>{
+    if(sx<0||sx>=GRID_W||sy<SEA_Y||sy>=GRID_H) return;
+    cells[idx(sx,sy-SEA_Y)]=colorId;
+  };
+  const getCell=(sx,sy)=>cells[idx(sx,sy-SEA_Y)];
+  const paintRun=(sy,x0,x1,colorId)=>{
+    if(sy<SEA_Y||sy>=GRID_H) return;
+    const start=Math.max(0,Math.round(Math.min(x0,x1)));
+    const end=Math.min(GRID_W-1,Math.round(Math.max(x0,x1)));
+    if(start>end) return;
+    const seaRow=sy-SEA_Y;
+    for(let sx=start;sx<=end;sx++) cells[idx(sx,seaRow)]=colorId;
+  };
+  const addRibbon=(cx,cy,halfW,height,colorId,seed)=>{
+    for(let dy=-height;dy<=height;dy++){
+      const sy=cy+dy;
+      if(sy<SEA_Y||sy>=GRID_H) continue;
+      const rowEase=1-Math.abs(dy)/(height+1);
+      const drift=Math.round(
+        Math.sin(t*0.28+seed+dy*0.83)*2+
+        Math.sin(t*0.16+seed*1.37+dy*1.41)
+      );
+      const inset=Math.round((1-rowEase)*halfW*0.34);
+      const leftNib=hash2(seed+dy*0.27,sy*0.13)<0.5 ? Math.floor(hash2(seed+dy*0.39,sy*0.29)*3) : 0;
+      const rightNib=hash2(seed+dy*0.31,sy*0.17)<0.5 ? Math.floor(hash2(seed+dy*0.47,sy*0.23)*3) : 0;
+      paintRun(sy,cx-halfW+inset+drift+leftNib,cx+halfW-inset+drift-rightNib,colorId);
+    }
+  };
+  const addCap=(cx,cy,halfW,seed,colorId=0)=>{
+    const drift=Math.round(Math.sin(t*0.24+seed)*2);
+    const leftLen=Math.max(2,Math.round(halfW*(0.4+hash2(seed,cy*0.19)*0.2)));
+    const rightLen=Math.max(2,Math.round(halfW*(0.35+hash2(seed+2.3,cy*0.23)*0.2)));
+    paintRun(cy,cx-halfW+drift,cx-halfW+drift+leftLen,colorId);
+    if(hash2(seed+4.1,cy*0.31)<0.74) paintRun(cy,cx+halfW-rightLen+drift,cx+halfW+drift,colorId);
+    if(halfW>8&&hash2(seed+7.7,cy*0.37)<0.28){
+      const midLen=Math.max(2,Math.round(halfW*0.3));
+      paintRun(cy,cx-Math.floor(midLen*0.5)+drift,cx+Math.ceil(midLen*0.5)+drift,colorId);
+    }
+  };
+
+  ctx.clearRect(0,SEA_Y*SP,cv.width,seaH*SP);
+
+  for(let seaRow=0;seaRow<seaH;seaRow++){
+    const sy=SEA_Y+seaRow;
+    for(let sx=0;sx<GRID_W;sx++) setCell(sx,sy,3);
+  }
+
+  // === 水面层次 ===
+  // 1) 地平线：中央月光附近最亮,两侧迅速暗下
+  const horizonSeed=Math.floor(t*0.47);
+  for(let sx=0;sx<GRID_W;sx++){
+    const distFromMoon=Math.abs(sx-moonCX);
+    if(distFromMoon<26){
+      // 月亮正下方的地平线：很亮的一条，宽幅
+      setCell(sx,SEA_Y,distFromMoon<17?0:1);
+    }else if(distFromMoon<46){
+      // 中圈：偶尔亮一点
+      setCell(sx,SEA_Y,hash2(sx*0.41,horizonSeed+11)<0.35?1:2);
+    }else{
+      setCell(sx,SEA_Y,hash2(sx*0.41,horizonSeed+13)<0.15?2:3);
+    }
+  }
+
+  // 2) 远处水面带（地平线下方一小段）：月光散射晕，随距离衰减
+  //    这一带的存在让水面不再是硬切：光柱和远景之间有一个中间地带
+  const glowRows=Math.max(6,Math.round(seaH*0.14));
+  for(let sy=SEA_Y+1;sy<=SEA_Y+glowRows;sy++){
+    const rowDepth=(sy-SEA_Y)/glowRows;  // 0 在地平线, 1 在远处带底
+    const glowHalf=Math.round(18+16*Math.sqrt(1-rowDepth));  // 用抛物线式包络收拢，避免像三角形
+    for(let sx=0;sx<GRID_W;sx++){
+      const dist=Math.abs(sx-moonCX);
+      if(dist>glowHalf){
+        // 带外：保持深色底，偶尔一点微光
+        if(hash2(sx*0.33,sy*0.41+horizonSeed)<0.04) setCell(sx,sy,2);
+        continue;
+      }
+      const mask=1-dist/glowHalf;  // 离中心越近越亮
+      // 根据 mask 和行深度决定颜色
+      const bias=mask*(1-rowDepth*0.35);  // 顶部中心 bias 最大
+      const r=hash2(sx*0.57,sy*0.71+horizonSeed);
+      if(r<bias*0.55) setCell(sx,sy,0);
+      else if(r<bias*0.85) setCell(sx,sy,1);
+      else if(r<bias*1.05) setCell(sx,sy,2);
+      // else 保持深色
+    }
+  }
+
+  // 3) 月光柱与扩散晕影：统一用一套包络生成
+  //    中心是更亮的光柱，向外自然过渡到中亮晕影，不再分成两张皮
+  const moonSeed=Math.floor(t*3)*2311;
+  const envelopeSeed=Math.floor(t*0.61);
+  const pillarTopHalf=24;    // 顶部（远端,地平线附近）半宽，更宽一些
+  const pillarBottomHalf=6;  // 底部（近端,画面底）半宽，仍然收窄但不至于太细
+  const pillarStartY=SEA_Y+glowRows-2;  // 从散射晕底部开始衔接
+  const pillarLeftByRow=new Int16Array(GRID_H);
+  const pillarRightByRow=new Int16Array(GRID_H);
+  const diffuseLeftByRow=new Int16Array(GRID_H);
+  const diffuseRightByRow=new Int16Array(GRID_H);
+  for(let sy=pillarStartY;sy<GRID_H;sy++){
+    const depth=(sy-pillarStartY)/Math.max(1,GRID_H-1-pillarStartY);  // 0顶,1底
+    const halfW=Math.max(1,Math.round(pillarBottomHalf+(pillarTopHalf-pillarBottomHalf)*Math.sqrt(1-depth)));
+    const jitterL=Math.round(Math.sin(sy*0.37+t*0.3)*1.4+(hash2(sy*0.19,moonSeed+3)-0.5)*2);
+    const jitterR=Math.round(Math.cos(sy*0.31+t*0.27)*1.4+(hash2(sy*0.23,moonSeed+7)-0.5)*2);
+    const leftEdge=moonCX-halfW+jitterL;
+    const rightEdge=moonCX+halfW+jitterR;
+    const expand=Math.round(7+19*Math.pow(1-depth,0.58));
+    const outerLeft=leftEdge-expand+Math.round(Math.sin(sy*0.17+t*0.23)*1.2);
+    const outerRight=rightEdge+expand+Math.round(Math.cos(sy*0.19+t*0.19)*1.2);
+    pillarLeftByRow[sy]=leftEdge;
+    pillarRightByRow[sy]=rightEdge;
+    diffuseLeftByRow[sy]=outerLeft;
+    diffuseRightByRow[sy]=outerRight;
+    const brightness=1-depth*0.82;
+    const center=(leftEdge+rightEdge)*0.5;
+    const totalHalf=Math.max(1,(outerRight-outerLeft)*0.5);
+    const coreHalf=Math.max(1,halfW*0.78);
+    const sparkHalf=Math.max(1,halfW*0.42);
+
+    for(let sx=outerLeft;sx<=outerRight;sx++){
+      if(sx<0||sx>=GRID_W) continue;
+      const dist=Math.abs(sx-center);
+      const coreMask=clamp(1-dist/Math.max(1,coreHalf));
+      const envelopeMask=clamp(1-dist/Math.max(1,totalHalf));
+      const haloMask=clamp((envelopeMask-coreMask*0.14)/0.86);
+      const ripple=Math.sin((sx-center)*0.19+sy*0.31+t*0.64)*0.5+0.5;
+      const noise=hash2(sx*0.31,sy*0.47+envelopeSeed);
+      const streakNoise=hash2(sx*0.13+17,sy*0.29+moonSeed);
+      const current=getCell(sx,sy);
+
+      if(coreMask>0){
+        const coreFill=brightness*(0.2+coreMask*0.38)+ripple*0.05;
+        if(current===3&&noise<coreFill){
+          setCell(sx,sy,2);
+        }
+        if(streakNoise<brightness*(0.18+coreMask*0.32)+ripple*0.035){
+          const next=getCell(sx,sy);
+          if(next===3||next===2) setCell(sx,sy,1);
+        }
+        if(dist<=sparkHalf&&streakNoise<brightness*(0.07+coreMask*0.14)){
+          const next=getCell(sx,sy);
+          if(next===1||next===2) setCell(sx,sy,0);
+        }
+      }else if(haloMask>0){
+        const haloFill=(1-depth*0.72)*(0.03+haloMask*0.24)+ripple*0.025;
+        if(current===3&&noise<haloFill){
+          setCell(sx,sy,2);
+        }else if(current===2&&depth<0.46&&haloMask>0.74&&noise<haloFill*0.12){
+          setCell(sx,sy,1);
+        }
+      }
+    }
+  }
+
+  // 4) 包络里的横向碎波：贴着统一包络分布，保持与光柱同走向
+  for(let sy=pillarStartY+1;sy<GRID_H-2;sy++){
+    const depth=(sy-pillarStartY)/Math.max(1,GRID_H-1-pillarStartY);
+    const leftEdge=pillarLeftByRow[sy];
+    const rightEdge=pillarRightByRow[sy];
+    const outerLeft=diffuseLeftByRow[sy];
+    const outerRight=diffuseRightByRow[sy];
+    const density=0.08+(1-depth)*0.055;
+    const bandSpan=Math.max(0,outerRight-outerLeft);
+    const barCount=Math.max(1,Math.round(bandSpan/28));
+    for(let i=0;i<barCount;i++){
+      const seed=sy*0.61+i*5.3;
+      if(hash2(seed,91+i)>density) continue;
+      const side=hash2(seed+0.17,101+i)<0.5?-1:1;
+      const rangeStart=side<0?outerLeft+2:rightEdge+4;
+      const rangeEnd=side<0?leftEdge-4:outerRight-2;
+      if(rangeEnd-rangeStart<3) continue;
+      const cx=Math.round(rangeStart+hash2(seed+0.4,113+i)*(rangeEnd-rangeStart));
+      const len=2+Math.floor(hash2(seed+0.9,131+i)*(2+(1-depth)*4));
+      const col=hash2(seed+1.3,151+i)<0.06?1:2;
+      paintRun(
+        sy,
+        Math.max(rangeStart,cx-Math.floor(len*0.5)),
+        Math.min(rangeEnd,cx+Math.ceil(len*0.5)),
+        col
+      );
+    }
+  }
+
+  // 6) 远处两侧小波光：在散射晕外缘再添零星白点,增加空间感
+  for(let sy=SEA_Y+2;sy<SEA_Y+glowRows+4;sy++){
+    for(let sx=0;sx<GRID_W;sx++){
+      const dist=Math.abs(sx-moonCX);
+      if(dist<28||dist>55) continue;
+      if(hash2(sx*0.47,sy*0.61+horizonSeed)<0.03){
+        setCell(sx,sy,1);
+      }
+    }
+  }
+
+  for(let seaRow=0;seaRow<seaH;seaRow++){
+    const sy=SEA_Y+seaRow;
+    for(let sx=0;sx<GRID_W;sx++){
+      spx(sx,sy,cssPalette[cells[idx(sx,seaRow)]]);
+    }
+  }
+}
+
+function buildSeaLayer(){
+  // Sea is rendered dynamically per frame in drawSea().
+}
+
+const BOAT_SHAPE = [
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+  [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+];
+
+function drawBoat(bx, by){
+  for(let r=0; r<BOAT_SHAPE.length; r++){
+    for(let c=0; c<BOAT_SHAPE[r].length; c++){
+      if(!BOAT_SHAPE[r][c]) continue;
+
+      let col = C.boatPlank;
+      if(r === 0) col = C.boatRim;
+      else if(r === 1 || r === 2) col = C.boatPlank;
+      else if(r === 3) col = C.boatHull;
+      else if(r === 4) col = C.boatDark;
+
+      spx(bx+c, by+r, col);
+    }
+  }
+}
+
+function drawMastAndFlag(mx,my,flagFrame,flagDir=1){
+  const mastX=mx;
+  const mastHeight=10;
+  for(let i=0;i<mastHeight;i++) spx(mastX,my-i,C.mastWood);
+  const flags=[
+    [[1,1,1,1,1],[1,1,1,1,0],[1,1,1,0,0]],
+    [[1,1,1,1,0],[1,1,1,0,1],[0,1,1,1,0]],
+    [[1,1,1,0,0],[0,1,1,1,1],[1,1,0,0,1]],
+  ];
+  const flag=flags[flagFrame%3];
+  const ftop=my-mastHeight;
+  for(let r=0;r<3;r++)
+    for(let c=0;c<5;c++)
+      if(flag[r][c]) spx(mastX+flagDir*(c+1),ftop+r,r===0&&c<2?C.flagLight:C.flagRed);
+}
+
+const CLAWD = [
+  [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+  [0,0,0,1,2,1,1,1,1,2,1,0,0,0],
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,0],
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,0],
+  [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+  [0,0,0,1,0,1,0,0,1,0,1,0,0,0],
+  [0,0,0,1,0,1,0,0,1,0,1,0,0,0],
+];
+const CLAWD_W = CLAWD[0].length;
+const EYEPOS={forward:[0,0],look_right:[1,0],blink:null};
+
+function drawClawd(ox,oy,eyes){
+  for(let r=0;r<8;r++)for(let c=0;c<14;c++)if(CLAWD[r][c])spx(ox+c,oy+r,C.clawdBody);
+  const e=EYEPOS[eyes||'forward'];
+  if(e){spx(ox+4+e[0],oy+1+e[1],C.clawdEye);spx(ox+9+e[0],oy+1+e[1],C.clawdEye);}
+}
+
+
+function drawClawdWave(ox,oy,eyes){
+  drawClawd(ox,oy,eyes);
+  spx(ox+13,oy+1,C.clawdBody);spx(ox+14,oy,C.clawdBody);spx(ox+14,oy-1,C.clawdBody);
+}
+
+let particles=[];
+function addP(x,y,col){particles.push({x,y,vx:(Math.random()-0.5)*0.5,vy:-Math.random()*0.4-0.1,life:1,col});}
+function tickP(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.02;p.life-=0.03;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    if(p.life>0.1)spx(Math.round(p.x),Math.round(p.y),p.col);
+  }
+}
+
+const FPS=30,DUR=6,TOTAL=FPS*DUR;
+const BOAT_W = BOAT_SHAPE[0].length;
+const BOAT_PX = Math.floor((GRID_W - BOAT_W) / 2);
+const BOAT_PY = SEA_Y - 2;
+
+function render(f){
+  drawSky();drawStars(f);drawMoon(f);drawSea(f);
+
+  const bobPX=Math.round(Math.sin(f*0.055)*0.8);
+  const bx=BOAT_PX,by=BOAT_PY+bobPX;
+  drawBoat(bx,by);
+
+  const windCycle=Math.floor(f/10);
+  const flagFrame=[0,1,2,1][windCycle%4];
+  const cx=bx+Math.floor((BOAT_W-CLAWD_W)/2),cy=by-8+bobPX;
+  drawMastAndFlag(cx-1,by,flagFrame,-1);
+  const wavePhase=f%(FPS*4);
+  const isWaving=wavePhase>FPS*3;
+  const isBlinking=(f%110)>104;
+  const eyes=isBlinking?'blink':isWaving?'forward':'look_right';
+
+  if(isWaving){
+    drawClawdWave(cx,cy,eyes);
+    if(f%5===0)addP(cx+7,cy-1,C.starMid);
+  }else{
+    drawClawd(cx,cy,eyes);
+  }
+  tickP();
+}
+
+let st=null;
+function loop(ts){
+  if(!st)st=ts;
+  const el=(ts-st)/1000,lt=el%DUR,f=Math.floor(lt*FPS);
+  if(lt<0.05)particles=[];
+  render(f);
+  document.getElementById('info').textContent=`clawd 夜海航行 — ${lt.toFixed(1)}s / ${DUR}.0s`;
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
