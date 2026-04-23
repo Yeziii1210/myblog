@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>yeziii</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    overflow: hidden;
+  }
+
+  /* --- ambient shader layer: full viewport, behind everything --- */
+  .yz-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .yz-backdrop canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* a faint vignette so edges settle, and the page doesn't feel like a window */
+  .yz-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 50%,
+                transparent 55%,
+                rgba(26, 22, 19, 0.035) 100%);
+    pointer-events: none;
+  }
+
+  /* --- page frame --- */
+  .yz-page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    padding: var(--space-8) var(--space-9);
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 720px) {
+    .yz-page { padding: var(--space-7) var(--space-6); }
+  }
+
+  /* --- header row: tiny brand mark + meta --- */
+  .yz-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+  .yz-top .mono { font-variant-numeric: tabular-nums; }
+  .yz-top .seal {
+    font-family: var(--font-cjk);
+    font-size: 13px;
+    color: var(--ink-4);
+    letter-spacing: 0.1em;
+  }
+
+  /* --- main content: aligned upper-left by default, wide left margin --- */
+  .yz-main {
+    align-self: center;
+    max-width: 720px;
+    /* sits roughly 1/3 down, upper-left */
+    padding-top: clamp(var(--space-7), 6vh, var(--space-9));
+  }
+
+  .yz-page[data-align="center"] .yz-main {
+    justify-self: center;
+    text-align: center;
+    padding-top: 0;
+    align-self: center;
+  }
+
+  /* the name, set as an editorial lockup */
+  .yz-name {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(56px, 8.5vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+    position: relative;
+    display: inline-block;
+  }
+  .yz-name .tail-i {
+    /* tiny coral accent on the last 'i' — the only chromatic mark in the lockup */
+    color: var(--coral);
+  }
+
+  .yz-name-row {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(14px, 2vw, 24px);
+  }
+  .yz-name-row .cjk {
+    font-family: var(--font-cjk);
+    font-size: clamp(28px, 3.6vw, 40px);
+    color: var(--ink-4);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    transform: translateY(-0.1em);
+  }
+
+  .yz-tagline {
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    color: var(--ink-3);
+    margin: var(--space-5) 0 0;
+    letter-spacing: 0.005em;
+    max-width: 38ch;
+  }
+  .yz-tagline em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  /* --- nav: vertical stack, generous rhythm --- */
+  .yz-nav {
+    margin-top: clamp(var(--space-8), 10vh, var(--space-9));
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 2.2vh, 22px);
+  }
+  .yz-page[data-align="center"] .yz-nav { align-items: center; }
+
+  .yz-nav a {
+    font-family: var(--font-serif);
+    font-size: clamp(20px, 2.3vw, 26px);
+    font-weight: 400;
+    color: var(--ink);
+    text-decoration: none;
+    border: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    width: fit-content;
+    transition:
+      color var(--dur-base) var(--ease),
+      letter-spacing var(--dur-base) var(--ease),
+      padding-left var(--dur-base) var(--ease);
+    padding-left: 0;
+    position: relative;
+  }
+
+  .yz-nav a::before {
+    /* index numeral — shows on hover/focus, in mono */
+    content: attr(data-idx);
+    position: absolute;
+    left: -42px;
+    top: 0.4em;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    letter-spacing: 0.08em;
+    opacity: 0;
+    transform: translateX(6px);
+    transition:
+      opacity var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease);
+  }
+  .yz-page[data-align="center"] .yz-nav a::before { display: none; }
+
+  .yz-nav a .arrow {
+    font-family: var(--font-serif);
+    font-size: 0.82em;
+    color: var(--ink-4);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+      opacity var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease),
+      color var(--dur-base) var(--ease);
+  }
+
+  .yz-nav a .aside {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--ink-4);
+    letter-spacing: 0.01em;
+    margin-left: var(--space-3);
+    font-style: normal;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+  }
+  .yz-page[data-asides="off"] .yz-nav a .aside { display: none; }
+
+  .yz-nav a:hover,
+  .yz-nav a:focus-visible {
+    color: var(--coral-deep);
+    outline: none;
+  }
+  .yz-nav a:hover::before,
+  .yz-nav a:focus-visible::before {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .yz-nav a:hover .arrow,
+  .yz-nav a:focus-visible .arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--coral);
+  }
+  .yz-nav a:hover .aside,
+  .yz-nav a:focus-visible .aside {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* --- footer row --- */
+  .yz-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+  .yz-bottom .jieqi {
+    font-family: var(--font-sans);
+    color: var(--ink-3);
+  }
+  .yz-bottom .jieqi .cjk {
+    font-family: var(--font-cjk);
+    color: var(--ink-2);
+    letter-spacing: 0.12em;
+    margin-right: 6px;
+  }
+  .yz-bottom .mark {
+    width: 22px;
+    height: 22px;
+    opacity: 0.55;
+  }
+
+  /* --- entrance animation: one soft, ambient reveal --- */
+  @keyframes yz-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .yz-top, .yz-name-row, .yz-tagline, .yz-nav a, .yz-bottom > * {
+    opacity: 0;
+    animation: yz-rise 800ms var(--ease) forwards;
+  }
+  .yz-top              { animation-delay: 120ms; }
+  .yz-name-row         { animation-delay: 280ms; }
+  .yz-tagline          { animation-delay: 460ms; }
+  .yz-nav a:nth-child(1) { animation-delay: 640ms; }
+  .yz-nav a:nth-child(2) { animation-delay: 720ms; }
+  .yz-nav a:nth-child(3) { animation-delay: 800ms; }
+  .yz-nav a:nth-child(4) { animation-delay: 880ms; }
+  .yz-nav a:nth-child(5) { animation-delay: 960ms; }
+  .yz-bottom > :first-child { animation-delay: 1080ms; }
+  .yz-bottom > :last-child  { animation-delay: 1180ms; }
+
+  /* --- Tweaks panel (hidden by default) --- */
+  .yz-tweaks {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 50;
+    width: 260px;
+    background: var(--paper-raised);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-5);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    display: none;
+  }
+  body[data-tweaks="on"] .yz-tweaks { display: block; }
+  .yz-tweaks h4 {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .yz-tweaks label {
+    display: block;
+    margin-bottom: var(--space-4);
+  }
+  .yz-tweaks label:last-of-type { margin-bottom: 0; }
+  .yz-tweaks .lbl {
+    font-size: var(--fs-xs);
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .yz-tweaks .seg {
+    display: flex;
+    gap: 4px;
+    background: var(--paper-sunk);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+  }
+  .yz-tweaks .seg button {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    color: var(--ink-2);
+    padding: 6px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background var(--dur-micro) var(--ease);
+  }
+  .yz-tweaks .seg button.is-active {
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow: var(--shadow-xs);
+  }
+  .yz-tweaks input[type="range"] {
+    width: 100%;
+    accent-color: var(--coral);
+  }
+</style>
+</head>
+<body>
+
+  <div class="yz-backdrop" aria-hidden="true">
+    <canvas id="shader"></canvas>
+  </div>
+
+  <main class="yz-page" id="page" data-align="upper-left" data-asides="off">
+
+    <header class="yz-top">
+      <span class="mono">yeziii · 叶</span>
+      <span class="mono"><span class="mono">2026</span> · 四月</span>
+    </header>
+
+    <section class="yz-main">
+      <div class="yz-name-row">
+        <h1 class="yz-name">yez<span class="tail-i">iii</span></h1>
+        <span class="cjk" aria-hidden="true">叶</span>
+      </div>
+
+      <p class="yz-tagline">
+        between <em>code</em> and <em>classical literature</em>.
+      </p>
+
+      <nav class="yz-nav" aria-label="primary">
+        <a href="#work"        data-idx="01">work         <span class="arrow">→</span><span class="aside">selected frontend things</span></a>
+        <a href="#writing"     data-idx="02">writing      <span class="arrow">→</span><span class="aside">long-form essays</span></a>
+        <a href="#notes"       data-idx="03">notes        <span class="arrow">→</span><span class="aside">shorter, unstructured</span></a>
+        <a href="#photography" data-idx="04">photography  <span class="arrow">→</span><span class="aside">a slow archive</span></a>
+        <a href="#colophon"    data-idx="05">colophon     <span class="arrow">→</span><span class="aside">how this page is made</span></a>
+      </nav>
+    </section>
+
+    <footer class="yz-bottom">
+      <span class="jieqi"><span class="cjk">谷雨</span>gǔyǔ · grain rain</span>
+      <span class="mono">last touched · 2026-04-23</span>
+    </footer>
+
+  </main>
+
+  <!-- Tweaks panel -->
+  <aside class="yz-tweaks" aria-label="Tweaks">
+    <h4>Tweaks</h4>
+
+    <label>
+      <div class="lbl"><span>alignment</span></div>
+      <div class="seg" data-seg="align">
+        <button data-v="upper-left" class="is-active">upper-left</button>
+        <button data-v="center">center</button>
+      </div>
+    </label>
+
+    <label>
+      <div class="lbl"><span>sublabels</span></div>
+      <div class="seg" data-seg="asides">
+        <button data-v="off" class="is-active">off</button>
+        <button data-v="on">on</button>
+      </div>
+    </label>
+
+    <label>
+      <div class="lbl"><span>shader</span><span id="shaderVal">standard</span></div>
+      <div class="seg" data-seg="shader">
+        <button data-v="quiet">quiet</button>
+        <button data-v="standard" class="is-active">standard</button>
+        <button data-v="present">present</button>
+      </div>
+    </label>
+
+    <label>
+      <div class="lbl"><span>grain</span><span id="grainVal">subtle</span></div>
+      <input type="range" id="grain" min="0" max="100" value="40" step="1">
+    </label>
+  </aside>
+
+  <!-- ============================================================
+       Shader — full-viewport ink-in-water, adapted from design system
+       ============================================================ -->
+  <script>
+  (() => {
+    const c = document.getElementById('shader');
+    const ctx = c.getContext('2d');
+    let raf = 0;
+    let intensity = 1.0;    // multiplier for alpha
+    let grainAmt = 40;      // 0..100
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      c.width = window.innerWidth * dpr;
+      c.height = window.innerHeight * dpr;
+      c.style.width = window.innerWidth + 'px';
+      c.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const rand = (a, b) => a + Math.random() * (b - a);
+
+    // wider, lazier drops spread across the full viewport
+    const drops = Array.from({ length: 6 }, (_, i) => ({
+      cx: rand(0.10, 0.90),
+      cy: rand(0.15, 0.85),
+      baseR: rand(220, 380),
+      drift: rand(0.00008, 0.00018),
+      phase: rand(0, Math.PI * 2),
+      coral: i < 4,
+      sub: Array.from({ length: 16 }, () => ({
+        ox: rand(-1, 1),
+        oy: rand(-1, 1),
+        rr: rand(0.45, 1.15),
+        ph: rand(0, Math.PI * 2),
+        sp: rand(0.00025, 0.00065),
+      })),
+    }));
+
+    const t0 = performance.now();
+    const draw = (now) => {
+      const t = now - t0;
+      const W = window.innerWidth, H = window.innerHeight;
+
+      ctx.fillStyle = '#FAF7F2';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.globalCompositeOperation = 'source-over';
+
+      for (const d of drops) {
+        const cx = (d.cx + Math.sin(t * d.drift + d.phase) * 0.07) * W;
+        const cy = (d.cy + Math.cos(t * d.drift * 0.8 + d.phase) * 0.06) * H;
+
+        for (const s of d.sub) {
+          const breath = 0.7 + Math.sin(t * s.sp + s.ph) * 0.25;
+          const r = d.baseR * s.rr * breath;
+          const x = cx + s.ox * d.baseR * 0.6 + Math.sin(t * s.sp * 0.7 + s.ph) * 18;
+          const y = cy + s.oy * d.baseR * 0.6 + Math.cos(t * s.sp * 0.5 + s.ph) * 14;
+
+          const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+          if (d.coral) {
+            g.addColorStop(0.0,  `rgba(226, 116, 87, ${0.055 * intensity})`);
+            g.addColorStop(0.35, `rgba(226, 116, 87, ${0.025 * intensity})`);
+            g.addColorStop(1.0,  'rgba(226, 116, 87, 0)');
+          } else {
+            g.addColorStop(0.0,  `rgba(176, 137, 104, ${0.04 * intensity})`);
+            g.addColorStop(0.4,  `rgba(176, 137, 104, ${0.016 * intensity})`);
+            g.addColorStop(1.0,  'rgba(176, 137, 104, 0)');
+          }
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // coral core — the heart of the ink, pulses very slowly
+      const core = drops[0];
+      const ccx = (core.cx + Math.sin(t * core.drift + core.phase) * 0.07) * W;
+      const ccy = (core.cy + Math.cos(t * core.drift * 0.8 + core.phase) * 0.06) * H;
+      const cr = core.baseR * (0.5 + Math.sin(t * 0.0004) * 0.08);
+      const cg = ctx.createRadialGradient(ccx, ccy, 0, ccx, ccy, cr);
+      cg.addColorStop(0,   `rgba(226, 116, 87, ${0.08 * intensity})`);
+      cg.addColorStop(0.6, `rgba(226, 116, 87, ${0.02 * intensity})`);
+      cg.addColorStop(1,   'rgba(226, 116, 87, 0)');
+      ctx.fillStyle = cg;
+      ctx.beginPath(); ctx.arc(ccx, ccy, cr, 0, Math.PI * 2); ctx.fill();
+
+      // grain — the surface of the paper
+      const grainCount = Math.round((grainAmt / 100) * 320);
+      for (let i = 0; i < grainCount; i++) {
+        ctx.fillStyle = `rgba(26, 22, 19, ${Math.random() * 0.022})`;
+        ctx.fillRect(Math.random() * W, Math.random() * H, 1, 1);
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+    raf = requestAnimationFrame(draw);
+
+    // expose
+    window.__yz = {
+      setIntensity: (v) => { intensity = v; },
+      setGrain: (v) => { grainAmt = v; },
+    };
+  })();
+  </script>
+
+  <!-- ============================================================
+       Tweaks wiring (Edit Mode protocol)
+       ============================================================ -->
+  <script>
+  (() => {
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "align": "upper-left",
+      "asides": "on",
+      "shader": "standard",
+      "grain": 26
+    }/*EDITMODE-END*/;
+
+    const state = { ...TWEAK_DEFAULTS };
+    const page = document.getElementById('page');
+
+    const SHADER_LEVELS = { quiet: 0.55, standard: 1.0, present: 1.6 };
+
+    const apply = () => {
+      page.dataset.align = state.align;
+      page.dataset.asides = state.asides;
+      window.__yz.setIntensity(SHADER_LEVELS[state.shader] ?? 1.0);
+      window.__yz.setGrain(state.grain);
+      document.getElementById('shaderVal').textContent = state.shader;
+      document.getElementById('grainVal').textContent =
+        state.grain < 20 ? 'none' :
+        state.grain < 60 ? 'subtle' :
+        state.grain < 85 ? 'visible' : 'heavy';
+
+      // reflect active state on segmented controls
+      document.querySelectorAll('.seg').forEach(seg => {
+        const key = seg.dataset.seg;
+        seg.querySelectorAll('button').forEach(b => {
+          b.classList.toggle('is-active', b.dataset.v === String(state[key]));
+        });
+      });
+    };
+    apply();
+
+    // segmented controls
+    document.querySelectorAll('.seg').forEach(seg => {
+      const key = seg.dataset.seg;
+      seg.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        state[key] = b.dataset.v;
+        apply();
+        postEdit({ [key]: b.dataset.v });
+      });
+    });
+
+    // grain slider
+    const grain = document.getElementById('grain');
+    grain.addEventListener('input', (e) => {
+      state.grain = parseInt(e.target.value, 10);
+      apply();
+    });
+    grain.addEventListener('change', (e) => {
+      postEdit({ grain: parseInt(e.target.value, 10) });
+    });
+
+    const postEdit = (edits) => {
+      try {
+        window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+      } catch {}
+    };
+
+    // Edit Mode protocol — LISTEN FIRST, then announce
+    window.addEventListener('message', (e) => {
+      if (!e.data || !e.data.type) return;
+      if (e.data.type === '__activate_edit_mode') {
+        document.body.dataset.tweaks = 'on';
+      } else if (e.data.type === '__deactivate_edit_mode') {
+        document.body.dataset.tweaks = 'off';
+      }
+    });
+    try {
+      window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    } catch {}
+  })();
+  </script>
+
+</body>
+</html>
