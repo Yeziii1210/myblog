@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- wave horizon -->
+  <path d="M4,20 C9,18 15,22 22,20 C26,19 28,18 28,20"
+        fill="none" stroke="#1A1613" stroke-width="1.2" stroke-linecap="round" opacity="0.85"/>
+  <!-- sail -->
+  <polygon points="13,7 6,20 20,20" fill="#E27457" opacity="0.93"/>
+  <!-- mast -->
+  <line x1="13" y1="8" x2="13" y2="20" stroke="#1A1613" stroke-width="0.7" opacity="0.28"/>
+</svg>

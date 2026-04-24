@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="200" height="120">
+  <!-- wave horizon, asymmetric -->
+  <path d="M20,72 C47,65 80,79 110,74 C133,70 152,66 180,72"
+        fill="none" stroke="#1A1613" stroke-width="1.6" stroke-linecap="round" opacity="0.88"/>
+  <!-- sail, left of center -->
+  <polygon points="72,18 54,72 92,72" fill="#E27457" opacity="0.93"/>
+  <!-- mast, hairline -->
+  <line x1="72" y1="22" x2="72" y2="72" stroke="#1A1613" stroke-width="0.8" opacity="0.28"/>
+  <!-- faint reflection -->
+  <polygon points="72,84 62,102 84,102" fill="#E27457" opacity="0.12"/>
+  <!-- two faint stars -->
+  <circle cx="138" cy="38" r="1.6" fill="#1A1613" opacity="0.20"/>
+  <circle cx="158" cy="52" r="1.1" fill="#1A1613" opacity="0.14"/>
+</svg>

@@ -1,54 +1,38 @@
-/* ============================================================
-   yeziii · design tokens
-   Warm off-white, restrained serif/sans mix, coral accent.
-   ============================================================ */
-
-/* Fonts loaded via CDN. If you swap to self-hosted files,
-   drop them in /fonts and update @font-face here. */
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Noto+Serif+SC:wght@400;500;600&display=swap');
 
 :root {
-  /* ---------- Color: paper / surface ---------- */
-  --paper:         #FAF7F2;   /* primary bg — warm off-white */
-  --paper-sunk:    #F3EEE5;   /* recessed (inputs, code) */
-  --paper-raised:  #FFFEFB;   /* cards, overlays */
-  --paper-deep:    #EDE6D9;   /* strongest off-white, dividers over paper */
+  --paper: #f8f3ea;
+  --paper-soft: #fbf8f2;
+  --paper-strong: #efe4d4;
+  --sand: #e8dcc7;
+  --sand-deep: #dac8ac;
+  --ink: #181511;
+  --ink-2: #4a433a;
+  --ink-3: #73685c;
+  --ink-4: #a79580;
+  --ink-5: rgba(24, 21, 17, 0.1);
+  --ink-6: rgba(24, 21, 17, 0.05);
+  --clay: #bf7052;
+  --clay-deep: #9d5438;
+  --clay-soft: rgba(191, 112, 82, 0.14);
+  --olive: #738069;
+  --olive-soft: rgba(115, 128, 105, 0.14);
 
-  /* ---------- Color: ink / text ---------- */
-  --ink:           #1A1613;   /* primary */
-  --ink-2:         #4A423B;   /* secondary */
-  --ink-3:         #7A7068;   /* tertiary / meta */
-  --ink-4:         #B8AFA4;   /* hairlines, disabled */
-  --ink-5:         #D9D1C4;   /* very faint rules */
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --fg-muted: var(--ink-2);
+  --fg-subtle: var(--ink-3);
+  --border: var(--ink-5);
+  --border-strong: rgba(24, 21, 17, 0.16);
+  --surface: rgba(255, 252, 246, 0.82);
+  --surface-strong: rgba(255, 252, 246, 0.92);
+  --surface-tint: rgba(239, 228, 212, 0.56);
 
-  /* ---------- Color: accents ---------- */
-  --coral:         #E27457;   /* primary accent (slightly softer) */
-  --coral-deep:    #BE5239;   /* hover / pressed */
-  --coral-soft:    #F0A088;   /* light accent, rare */
-  --coral-wash:    #F9EAE3;   /* coral-tinted bg, callouts */
+  --font-serif: "Newsreader", "Source Serif 4", "Noto Serif SC", Georgia, serif;
+  --font-sans: "Manrope", "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-cjk: "Noto Serif SC", "Songti SC", serif;
 
-  --sage:          #8AA892;   /* secondary accent (success, spring) */
-  --sage-wash:     #E9F0EA;
-
-  --clay:          #B08968;   /* tertiary accent (autumn) */
-  --clay-wash:     #F2E9DE;
-
-  /* ---------- Semantic roles ---------- */
-  --bg:            var(--paper);
-  --bg-raised:     var(--paper-raised);
-  --bg-sunk:       var(--paper-sunk);
-  --fg:            var(--ink);
-  --fg-muted:      var(--ink-2);
-  --fg-subtle:     var(--ink-3);
-  --fg-faint:      var(--ink-4);
-  --border:        var(--ink-4);
-  --border-subtle: var(--ink-5);
-  --link:          var(--coral);
-  --link-hover:    var(--coral-deep);
-  --selection:     var(--coral-wash);
-
-  /* ---------- Spacing (8px base) ---------- */
-  --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -60,267 +44,101 @@
   --space-9: 96px;
   --space-10: 128px;
 
-  /* ---------- Radii ---------- */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
   --radius-pill: 999px;
 
-  /* ---------- Shadows (soft, single-elevation) ---------- */
-  --shadow-xs: 0 1px 1px rgba(26, 22, 19, 0.03);
-  --shadow-sm: 0 1px 2px rgba(26, 22, 19, 0.04);
-  --shadow-md: 0 4px 16px -4px rgba(26, 22, 19, 0.06),
-               0 1px 2px rgba(26, 22, 19, 0.04);
-  --shadow-lg: 0 12px 32px -8px rgba(26, 22, 19, 0.08),
-               0 2px 4px rgba(26, 22, 19, 0.04);
+  --shadow-sm: 0 10px 30px rgba(51, 40, 24, 0.06);
+  --shadow-md: 0 16px 48px rgba(51, 40, 24, 0.08);
+  --shadow-lg: 0 28px 84px rgba(51, 40, 24, 0.12);
 
-  /* ---------- Motion ---------- */
-  --ease:         cubic-bezier(0.32, 0.72, 0, 1);
-  --dur-micro:    180ms;
-  --dur-base:     320ms;
-  --dur-ambient:  800ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 800ms;
 
-  /* ---------- Type families ---------- */
-  --font-serif:   'Source Serif 4', 'Noto Serif SC', Georgia, 'Songti SC', serif;
-  --font-sans:    'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --font-cjk:     'Noto Serif SC', 'Songti SC', 'SimSun', serif;
-
-  /* ---------- Type scale ---------- */
-  --fs-xs:    12px;
-  --fs-sm:    14px;
-  --fs-base:  16px;
-  --fs-md:    18px;
-  --fs-lg:    20px;
-  --fs-xl:    24px;
-  --fs-2xl:   32px;
-  --fs-3xl:   40px;
-  --fs-4xl:   56px;
-  --fs-5xl:   72px;
-
-  /* ---------- Line heights ---------- */
-  --lh-tight:   1.15;
-  --lh-snug:    1.3;
-  --lh-normal:  1.5;
-  --lh-relaxed: 1.65;
-  --lh-loose:   1.8;
-
-  /* ---------- Layout widths ---------- */
-  --w-reading:  680px;
-  --w-content:  960px;
-  --w-wide:     1200px;
+  --w-reading: 720px;
+  --w-content: 1040px;
+  --w-wide: 1180px;
 }
 
-/* ============================================================
-   Semantic element defaults
-   ============================================================ */
+html {
+  scroll-behavior: smooth;
+}
 
-html, body {
+body {
+  margin: 0;
+  min-height: 100vh;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
-  font-size: var(--fs-base);
-  line-height: var(--lh-relaxed);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-::selection {
-  background: var(--selection);
-  color: var(--ink);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* ---------- Headings (serif, display) ---------- */
-h1, .h1 {
-  font-family: var(--font-serif);
-  font-size: var(--fs-4xl);
-  line-height: var(--lh-tight);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  color: var(--fg);
-  margin: 0 0 var(--space-5);
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
-h2, .h2 {
-  font-family: var(--font-serif);
-  font-size: var(--fs-3xl);
-  line-height: var(--lh-snug);
-  font-weight: 400;
-  letter-spacing: -0.005em;
-  margin: 0 0 var(--space-4);
-}
-
-h3, .h3 {
-  font-family: var(--font-serif);
-  font-size: var(--fs-2xl);
-  line-height: var(--lh-snug);
-  font-weight: 400;
-  margin: 0 0 var(--space-3);
-}
-
-h4, .h4 {
-  font-family: var(--font-sans);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-snug);
-  font-weight: 500;
-  margin: 0 0 var(--space-3);
-}
-
-/* ---------- Body ---------- */
-p, .p {
-  font-family: var(--font-sans);
-  font-size: var(--fs-base);
-  line-height: var(--lh-relaxed);
-  color: var(--fg);
-  margin: 0 0 var(--space-4);
-}
-
-.prose p {
-  font-family: var(--font-serif);
-  font-size: var(--fs-md);
-  line-height: var(--lh-loose);
-}
-
-/* ---------- Meta / labels ---------- */
-.meta, small {
-  font-family: var(--font-sans);
-  font-size: var(--fs-sm);
-  color: var(--fg-subtle);
-  letter-spacing: 0.01em;
-}
-
-.label {
-  font-family: var(--font-sans);
-  font-size: var(--fs-xs);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--fg-subtle);
-}
-
-/* ---------- Code ---------- */
-code, .code {
-  font-family: var(--font-mono);
-  font-size: 0.92em;
-  background: var(--bg-sunk);
-  padding: 1px 5px;
-  border-radius: var(--radius-xs);
-  color: var(--ink-2);
-}
-
-pre {
-  font-family: var(--font-mono);
-  font-size: var(--fs-sm);
-  line-height: var(--lh-normal);
-  background: var(--bg-sunk);
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-}
-
-pre code { background: none; padding: 0; }
-
-/* ---------- Links ---------- */
-a, .link {
-  color: var(--link);
+a {
+  color: inherit;
   text-decoration: none;
-  border-bottom: 1px solid color-mix(in oklch, var(--coral) 30%, transparent);
-  transition: color var(--dur-micro) var(--ease),
-              border-color var(--dur-micro) var(--ease);
 }
 
-a:hover, .link:hover {
-  color: var(--link-hover);
-  border-bottom-color: var(--coral-deep);
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
-a:active, .link:active { opacity: 0.7; }
-
-/* ---------- Rules / dividers ---------- */
-hr {
-  border: 0;
-  height: 1px;
-  background: var(--border-subtle);
-  margin: var(--space-7) 0;
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
 }
 
-/* ---------- CJK helper ---------- */
-.cjk {
-  font-family: var(--font-cjk);
-  font-weight: 400;
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* ---------- Drop cap (editorial) ---------- */
-.dropcap::first-letter {
-  font-family: var(--font-serif);
-  font-size: 3.4em;
-  float: left;
-  line-height: 0.9;
-  padding: 0.08em 0.08em 0 0;
-  color: var(--coral);
-  font-weight: 400;
-}
-
-/* ---------- Buttons (base) ---------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-sans);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  line-height: 1;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  background: var(--ink);
-  color: var(--paper);
-  cursor: pointer;
-  transition: background var(--dur-micro) var(--ease),
-              opacity var(--dur-micro) var(--ease);
-}
-
-.btn:hover { background: #000; }
-.btn:active { opacity: 0.8; }
-
-.btn-ghost {
-  background: transparent;
+::selection {
+  background: rgba(191, 112, 82, 0.18);
   color: var(--ink);
-  border-color: var(--border);
-}
-.btn-ghost:hover { background: var(--paper-sunk); border-color: var(--ink-3); }
-
-.btn-coral {
-  background: var(--coral);
-  color: white;
-}
-.btn-coral:hover { background: var(--coral-deep); }
-
-/* ---------- Inputs ---------- */
-.input {
-  font-family: var(--font-sans);
-  font-size: var(--fs-base);
-  padding: 10px 12px;
-  background: var(--paper-sunk);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  color: var(--ink);
-  transition: border-color var(--dur-micro) var(--ease),
-              background var(--dur-micro) var(--ease);
-}
-.input:focus {
-  outline: none;
-  background: var(--paper-raised);
-  border-color: var(--coral);
 }
 
-/* ---------- Card ---------- */
-.card {
-  background: var(--paper-raised);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-sm);
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
