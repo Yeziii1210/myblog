@@ -1,0 +1,151 @@
+@media (max-width: 1120px) {
+  .hero,
+  .desk-grid,
+  .section-header,
+  .contact-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: auto;
+  }
+
+  .hero-title {
+    max-width: 12ch;
+  }
+
+  .artifact {
+    max-width: 720px;
+  }
+
+  .work-feature {
+    grid-template-columns: 1fr;
+  }
+
+  .work-preview {
+    min-height: 320px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(24, 21, 17, 0.08);
+  }
+
+  .thread-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header-shell {
+    padding: 16px 18px 0;
+  }
+
+  .site-header,
+  .site-header-shell.is-scrolled .site-header {
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    padding: 12px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .site-nav {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .header-tools {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 9px;
+  }
+
+  .brand-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .site-main {
+    padding: 38px 18px 72px;
+  }
+
+  .hero-title {
+    font-size: clamp(3.2rem, 15.2vw, 5rem);
+  }
+
+  .hero-meta,
+  .artifact-grid,
+  .writing-row {
+    grid-template-columns: 1fr;
+  }
+
+  .artifact-grid {
+    grid-template-rows: auto;
+  }
+
+  .hero-meta {
+    gap: 18px;
+    margin-top: 56px;
+  }
+
+  .artifact {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .paperclip {
+    display: none;
+  }
+
+  .artifact-block,
+  .artifact-block:nth-child(odd),
+  .artifact-block:nth-last-child(-n + 2) {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(24, 21, 17, 0.08);
+  }
+
+  .artifact-block:last-child {
+    border-bottom: 0;
+  }
+
+  .work-copy,
+  .writing-panel {
+    padding: 28px;
+  }
+
+  .writing-panel::after {
+    display: none;
+  }
+
+  .writing-list {
+    padding-right: 0;
+  }
+
+  .contact-panel {
+    padding: 28px;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { Header } from "@/components/Header";
@@ -12,11 +10,9 @@ import {
   SectionHeader,
   Tags,
 } from "@/components/ui";
-import { useSiteLanguage } from "@/components/LanguageProvider";
+import { siteContent } from "@/data/site-content";
 
 export function HomePage() {
-  const { content } = useSiteLanguage();
-
   return (
     <div className="site-shell" id="top">
       <div className="paper-grain" aria-hidden="true" />
@@ -25,23 +21,23 @@ export function HomePage() {
       <main className="site-main">
         <section className="hero" aria-labelledby="hero-title">
           <Reveal className="hero-copy" immediate>
-            <Eyebrow>{content.hero.eyebrow}</Eyebrow>
+            <Eyebrow>{siteContent.hero.eyebrow}</Eyebrow>
             <h1 className="hero-title" id="hero-title">
-              {content.hero.title}
+              {siteContent.hero.title}
             </h1>
-            <p className="hero-lede">{content.hero.lede}</p>
+            <p className="hero-lede">{siteContent.hero.lede}</p>
 
             <div className="hero-actions">
               <a className="button" href="#work">
-                <span>{content.hero.primaryCta}</span> <LinkArrow />
+                <span>{siteContent.hero.primaryCta}</span> <LinkArrow />
               </a>
               <a className="text-link" href="#writing">
-                <span>{content.hero.secondaryCta}</span> <LinkArrow />
+                <span>{siteContent.hero.secondaryCta}</span> <LinkArrow />
               </a>
             </div>
 
             <dl className="hero-meta">
-              {content.hero.meta.map((item) => (
+              {siteContent.hero.meta.map((item) => (
                 <div key={item.label}>
                   <dt>{item.label}</dt>
                   <dd>{item.text}</dd>
@@ -59,7 +55,7 @@ export function HomePage() {
 
         <footer className="footer">
           <span>yeziii / night sea notes</span>
-          <span>{content.footerMeta}</span>
+          <span>{siteContent.footerMeta}</span>
         </footer>
       </main>
     </div>
@@ -67,8 +63,7 @@ export function HomePage() {
 }
 
 function ArtifactPanel() {
-  const { content } = useSiteLanguage();
-  const { artifact } = content;
+  const { artifact } = siteContent;
 
   return (
     <Reveal
@@ -78,7 +73,7 @@ function ArtifactPanel() {
       immediate
     >
       <span className="paperclip" aria-hidden="true">
-        <Image src="/assets/pin.svg" alt="" width={82} height={124} />
+        <Image src="/assets/pin.svg" alt="" width={180} height={240} />
       </span>
       <div className="artifact-grid">
         <article className="artifact-block">
@@ -124,8 +119,7 @@ function ArtifactPanel() {
 }
 
 function WorkSection() {
-  const { content } = useSiteLanguage();
-  const { work, writing } = content;
+  const { work, writing } = siteContent;
 
   return (
     <section className="section" id="work" aria-labelledby="work-title">
@@ -179,8 +173,7 @@ function WorkSection() {
 }
 
 function NotesSection() {
-  const { content } = useSiteLanguage();
-  const { notes } = content;
+  const { notes } = siteContent;
 
   return (
     <section className="section" id="notes" aria-labelledby="notes-title">
@@ -207,8 +200,7 @@ function NotesSection() {
 }
 
 function ContactSection() {
-  const { content } = useSiteLanguage();
-  const { contact } = content;
+  const { contact } = siteContent;
 
   return (
     <section className="section" id="contact" aria-labelledby="contact-title">

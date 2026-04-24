@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
-import { LanguageProvider } from "@/components/LanguageProvider";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { siteContent } from "@/data/site-content";
 
 export const metadata: Metadata = {
   title: "yeziii",
-  description: "yeziii 的个人首页：安静的系统、编辑感界面、写作与小实验。",
+  description: siteContent.metaDescription,
   icons: {
     icon: "/assets/favicon.svg",
   },
@@ -20,7 +20,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body>
-        <LanguageProvider>{children}</LanguageProvider>
+        {children}
+        <SpeedInsights />
       </body>
     </html>
   );

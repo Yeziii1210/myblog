@@ -2,16 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { type Language } from "@/data/site-content";
-import { useSiteLanguage } from "@/components/LanguageProvider";
-
-const languageOptions: Array<{ value: Language; label: string }> = [
-  { value: "zh", label: "中文" },
-  { value: "en", label: "EN" },
-];
+import { siteContent } from "@/data/site-content";
 
 export function Header() {
-  const { content, language, setLanguage } = useSiteLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -38,7 +31,7 @@ export function Header() {
         </a>
 
         <nav className="site-nav" aria-label="Primary navigation">
-          {content.nav.map((item) => (
+          {siteContent.nav.map((item) => (
             <a href={item.href} key={item.href}>
               {item.label}
             </a>
@@ -46,19 +39,6 @@ export function Header() {
         </nav>
 
         <div className="header-tools">
-          <div className="language-switch" aria-label="Language switch">
-            {languageOptions.map((option) => (
-              <button
-                className="lang-button"
-                type="button"
-                key={option.value}
-                aria-pressed={language === option.value}
-                onClick={() => setLanguage(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
           <Image
             className="brand-avatar"
             src="/assets/avatar.jpeg"

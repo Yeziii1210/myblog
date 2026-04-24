@@ -23,7 +23,8 @@ pnpm build
 
 - `app/` contains the Next.js routes and global styles.
 - `components/` contains reusable UI and page sections.
-- `data/site-content.ts` contains the bilingual site copy used by the components.
+- `data/site-content.ts` contains the Chinese site copy used by the components.
 - `docs/` contains design principles and project documentation.
+- `styles/` contains global CSS split by responsibility and imported by `app/globals.css`.
 - `public/assets/` contains static image assets.
 - `public/experiments/night-sea-clawd.html` keeps the canvas animation isolated from the homepage bundle.
