@@ -1,6 +1,6 @@
 # Design Principles: Anthropic / Claude-Inspired Personal Homepage
 
-AI implementation reference. The Chinese user-facing version lives in `Design_principles_zh.md`.
+AI implementation reference. The Chinese user-facing version lives in `design-principles.zh.md`.
 
 ## 1. Core Direction
 

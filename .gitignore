@@ -1,1 +1,13 @@
+node_modules/
+.next/
+.pnpm-store/
+out/
+dist/
+build/
+.env*
+!.env.example
+*.log
+*.tsbuildinfo
 .DS_Store
+package-lock.json
+yarn.lock

@@ -2,7 +2,7 @@
 
 基于 Anthropic / Claude 的设计语言研究，但不直接复制。
 
-英文 AI 实现参考见 `Design_principles.md`。
+英文 AI 实现参考见 `design-principles.md`。
 
 ## 1. 总体方向
 
@@ -470,7 +470,7 @@ Hero 不要写成销售页口号，而要像编辑导语。
 
 ## 13. 当前项目可沿用的设计 token
 
-项目里已有的 `tokens.css` 方向非常接近这个设计语言，可以继续沿用：
+当前项目的设计 token 已整合到 `app/globals.css`，方向非常接近这个设计语言，可以继续沿用：
 
 ```css
 :root {

@@ -1,0 +1,4 @@
+next-env.d.ts
+.next/
+node_modules/
+public/experiments/night-sea-clawd.html
