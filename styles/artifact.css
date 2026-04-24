@@ -1,7 +1,7 @@
 .artifact {
-  --paperclip-width: 76px;
-  --paperclip-right: 58px;
-  --paperclip-bottom: -50px;
+  --paperclip-width: min(13.5%, 76px);
+  --paperclip-right: min(10.3%, 58px);
+  --paperclip-grip-offset: -66.45%;
   --paperclip-rotate: 0deg;
   position: relative;
   padding: 22px;
@@ -29,22 +29,26 @@
 
 .paperclip {
   position: absolute;
+  top: 100%;
   right: var(--paperclip-right);
-  bottom: var(--paperclip-bottom);
   width: var(--paperclip-width);
-  aspect-ratio: 3 / 4;
+  height: 0;
   transform: rotate(var(--paperclip-rotate));
-  transform-origin: 50% 55%;
-  opacity: 0.72;
-  filter: drop-shadow(0 8px 6px rgba(62, 46, 26, 0.1));
+  transform-origin: 50% 0;
   overflow: visible;
   pointer-events: none;
   z-index: 4;
 }
 
 .paperclip img {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 100%;
   height: auto;
+  transform: translateY(var(--paperclip-grip-offset));
+  opacity: 0.72;
+  filter: drop-shadow(0 8px 6px rgba(62, 46, 26, 0.1));
   user-select: none;
 }
 
