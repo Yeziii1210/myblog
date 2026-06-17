@@ -95,13 +95,6 @@
     grid-column: 2;
   }
 
-  .chrome-issue {
-    display: none;
-  }
-  .chrome-nav {
-    gap: 14px;
-  }
-
   /* fewer poster tiles read better on small screens */
   .gate-collage {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -119,9 +112,6 @@
   }
   .masthead-title {
     letter-spacing: 0.04em;
-  }
-  .chrome-nav .chrome-link:not(:last-of-type) {
-    display: none;
   }
   .contents-excerpt {
     font-size: 0.82rem;

@@ -54,10 +54,6 @@
     transform: none;
   }
 
-  .masthead-scroll {
-    animation: none;
-  }
-
   .deck-card {
     transition: none;
   }
