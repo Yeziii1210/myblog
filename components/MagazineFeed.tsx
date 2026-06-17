@@ -27,9 +27,6 @@ export function MagazineFeed() {
           </h1>
           <span className="masthead-sub">{masthead.titleSub}</span>
           <p className="masthead-tagline">{tagline}</p>
-          <span className="masthead-scroll" aria-hidden="true">
-            向下翻阅 ↓
-          </span>
         </Reveal>
       </section>
 

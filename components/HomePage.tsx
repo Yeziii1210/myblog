@@ -1,7 +1,6 @@
 import { IntroGate } from "@/components/IntroGate";
 import { Chrome } from "@/components/Chrome";
 import { MagazineFeed } from "@/components/MagazineFeed";
-import { FooterCta } from "@/components/FooterCta";
 import { ScrollFx } from "@/components/ScrollFx";
 
 export function HomePage() {
@@ -13,7 +12,6 @@ export function HomePage() {
       <Chrome />
       <main className="site-main">
         <MagazineFeed />
-        <FooterCta />
       </main>
       <ScrollFx />
     </div>
