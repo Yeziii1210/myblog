@@ -1,0 +1,12 @@
+/* 得意黑 Smiley Sans — open-source condensed CJK display, paired with Anton.
+   Loaded from jsDelivr; if it fails, the stack falls back to Noto Serif SC 700.
+   It is an oblique (slanted) face — intentional vintage-poster energy. */
+@font-face {
+  font-family: "Smiley Sans";
+  src:
+    url("https://cdn.jsdelivr.net/gh/atelier-anchor/smiley-sans@v2.0.1/dist/SmileySans-Oblique.ttf.woff2")
+      format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}

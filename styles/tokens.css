@@ -1,39 +1,60 @@
 :root {
-  --paper: #f8f3ea;
-  --paper-soft: #fbf8f2;
-  --paper-strong: #efe4d4;
-  --sand: #e8dcc7;
-  --sand-deep: #dac8ac;
-  --ink: #181511;
-  --ink-2: #4a433a;
-  --ink-3: #73685c;
-  --ink-4: #a79580;
-  --ink-5: rgba(24, 21, 17, 0.1);
-  --ink-6: rgba(24, 21, 17, 0.05);
-  --clay: #bf7052;
-  --clay-deep: #9d5438;
-  --clay-soft: rgba(191, 112, 82, 0.14);
-  --olive: #738069;
-  --olive-soft: rgba(115, 128, 105, 0.14);
-  --bg: var(--paper);
-  --fg: var(--ink);
-  --fg-muted: var(--ink-2);
-  --fg-subtle: var(--ink-3);
-  --border: var(--ink-5);
-  --border-strong: rgba(24, 21, 17, 0.16);
-  --surface: rgba(255, 252, 246, 0.82);
-  --surface-strong: rgba(255, 252, 246, 0.92);
-  --surface-tint: rgba(239, 228, 212, 0.56);
-  --font-serif: "Newsreader", "Source Serif 4", "Noto Serif SC", Georgia, serif;
-  --font-sans: "Manrope", "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+  /* ---- Canvas (dark cinematic) ---- */
+  --bg: #060606;
+  --bg-pure: #000000;
+  --bg-raise: #0d0c0b;
+
+  /* ---- Paper cards (aged polaroid) ---- */
+  --paper: #f4efe3;
+  --paper-soft: #fbf7ec;
+  --paper-edge: #e7dcc4;
+  --paper-shade: #d9ccae;
+  --paper-ink: #1a1714;
+  --paper-ink-2: #4a4036;
+  --paper-ink-3: #7a6f5e;
+
+  /* ---- Foreground on black ---- */
+  --fg: #f5f2ea;
+  --fg-muted: rgba(245, 242, 234, 0.58);
+  --fg-faint: rgba(245, 242, 234, 0.34);
+  --fg-ghost: rgba(245, 242, 234, 0.12);
+
+  /* ---- Warm accents ---- */
+  --gold: #c8a25a;
+  --gold-deep: #9c7a3a;
+  --cream: #efe7d6;
+  --rust: #b4623c;
+  --tape: rgba(222, 202, 158, 0.42);
+  --tape-edge: rgba(180, 158, 110, 0.5);
+
+  /* ---- Lines ---- */
+  --hair: rgba(245, 242, 234, 0.12);
+  --hair-strong: rgba(245, 242, 234, 0.22);
+
+  /* ---- Typography ---- */
+  --font-display: "Anton", "Archivo", "Smiley Sans", sans-serif;
+  --font-name: "Archivo", "Smiley Sans", "Noto Serif SC", sans-serif;
+  --font-mono: "Space Mono", "IBM Plex Mono", ui-monospace, monospace;
+  --font-serif-italic: "Fraunces", "Newsreader", Georgia, serif;
+  --font-script: "Caveat", "Brush Script MT", cursive;
+  --font-cjk-display: "Smiley Sans", "Noto Serif SC", "Songti SC", serif;
   --font-cjk: "Noto Serif SC", "Songti SC", serif;
-  --radius-pill: 999px;
-  --shadow-sm: 0 10px 30px rgba(51, 40, 24, 0.06);
-  --shadow-md: 0 16px 48px rgba(51, 40, 24, 0.08);
-  --shadow-lg: 0 28px 84px rgba(51, 40, 24, 0.12);
+
+  /* ---- Shadows (deep, for dark) ---- */
+  --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 36px 90px rgba(0, 0, 0, 0.62),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-deck: 0 18px 46px rgba(0, 0, 0, 0.5);
+  --shadow-badge: 0 0 0 1px rgba(200, 162, 90, 0.4), 0 8px 30px rgba(0, 0, 0, 0.5);
+
+  /* ---- Motion ---- */
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 180ms;
-  --dur-base: 320ms;
-  --dur-slow: 800ms;
+  --dur-base: 360ms;
+  --dur-slow: 820ms;
+  --dur-cinematic: 1100ms;
+
+  --radius-card: 4px;
+  --radius-pill: 999px;
 }

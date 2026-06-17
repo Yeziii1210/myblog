@@ -1,10 +1,11 @@
 .site-shell {
   position: relative;
-  height: 100svh;
-  overflow: hidden;
+  min-height: 100svh;
   isolation: isolate;
+  background-color: var(--bg);
 }
 
+/* Atmospheric warm glow + deep edges behind the content */
 .site-shell::before,
 .site-shell::after {
   content: "";
@@ -15,30 +16,31 @@
 }
 
 .site-shell::before {
-  opacity: 0.22;
-  background-image:
-    linear-gradient(rgba(24, 21, 17, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(24, 21, 17, 0.026) 1px, transparent 1px);
-  background-size: 108px 108px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.32), transparent 78%);
-}
-
-.site-shell::after {
   z-index: -2;
   background:
-    linear-gradient(90deg, rgba(5, 15, 28, 0.08), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 48%);
+    radial-gradient(
+      80% 50% at 50% -6%,
+      rgba(200, 162, 90, 0.1),
+      transparent 60%
+    ),
+    radial-gradient(
+      70% 60% at 84% 18%,
+      rgba(120, 80, 40, 0.08),
+      transparent 62%
+    );
 }
 
-.paper-grain {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.14;
+/* Faint grid — barely-there blueprint texture */
+.site-shell::after {
+  opacity: 0.5;
   background-image:
-    radial-gradient(circle at 20% 30%, rgba(24, 21, 17, 0.12) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 78% 64%, rgba(24, 21, 17, 0.08) 0 1px, transparent 1.5px);
-  background-size: 42px 46px, 58px 54px;
-  mix-blend-mode: multiply;
+    linear-gradient(rgba(245, 242, 234, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 242, 234, 0.018) 1px, transparent 1px);
+  background-size: 120px 120px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent 70%);
+}
+
+/* legacy hook kept harmless (was the light paper grain) */
+.paper-grain {
+  display: none;
 }

@@ -1,0 +1,114 @@
+.chrome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 38px);
+  pointer-events: none;
+}
+
+.chrome > * {
+  pointer-events: auto;
+}
+
+.chrome-brand {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.chrome-brand:hover {
+  transform: translateY(-1px);
+}
+
+.chrome-script {
+  font-family: var(--font-script);
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--cream);
+  line-height: 0.9;
+}
+
+.chrome-badge {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  border: 1px solid var(--hair-strong);
+  border-radius: 2px;
+  padding: 3px 7px 2px;
+  align-self: flex-start;
+}
+
+.chrome-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(12px, 1.8vw, 26px);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.chrome-link {
+  color: var(--fg-muted);
+  position: relative;
+  padding-bottom: 3px;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.chrome-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-standard);
+}
+
+.chrome-link:hover {
+  color: var(--cream);
+}
+
+.chrome-link:hover::after {
+  transform: scaleX(1);
+}
+
+.chrome-issue {
+  color: var(--gold);
+  border: 1px solid rgba(200, 162, 90, 0.4);
+  border-radius: 2px;
+  padding: 3px 8px 2px;
+  font-size: 0.6rem;
+}
+
+.chrome-back {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  border: 1px solid var(--hair-strong);
+  border-radius: 2px;
+  padding: 6px 12px;
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+
+.chrome-back:hover {
+  color: var(--cream);
+  border-color: var(--gold);
+}
