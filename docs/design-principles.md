@@ -1,96 +1,58 @@
-# Design Principles — Dark Cinematic Editorial (Personal Magazine)
+# Design Principles — Dark Minimal (Personal Writing Site)
 
 > AI implementation reference. The Chinese version lives in `design-principles.zh.md`.
 >
-> In 2025 this site moved from a "warm paper-and-ink blog" to a "personal magazine
-> shot in a darkroom." The visual language follows `south-by-locals.wanderlustmagazine.com`:
-> tilted, aged polaroid cards scattered on a pure-black canvas, display-type headlines,
-> monospace sub-labels, a handwritten script watermark, scroll parallax, and an intro gate.
->
-> The previous Anthropic/Claude warm-paper direction no longer applies — see git history if needed.
+> This site evolved twice: first from a "warm paper-and-ink blog" to a "darkroom
+> personal magazine," then collapsed — by request, "minimal to the extreme" — into its
+> current form: **a dark, restrained personal writing site.** The former magazine
+> pieces (intro gate, polaroid cards, scattered layout, deck, parallax) were removed;
+> see git history if needed.
 
-## 1. Core feeling
+## 1. Current form
 
-It should feel like a private publication leafed through in a darkroom — a deck of
-instant photos with tape and handwritten notes on a black desk. It is a magazine of
-one: the content *is* the introduction, so keep self-statement minimal.
-
-It should NOT feel like a light SaaS landing page, a neon cyber AI site, or an
-information-dense equal-weight card grid.
+- **Home** = nothing but the "写作 / WRITING" article index, vertically centered on a
+  pure-black canvas.
+- **Article pages** = dark but reading-first long-form: a cursive `yeziii` mark + back
+  link top-left (`Chrome`), a polaroid-style header, light-ink body.
+- "Simple content is the best self-introduction" — no self-statement, no decorative
+  modules; the list and the writing itself are the introduction.
 
 ## 2. Color (`styles/tokens.css`)
 
-- Canvas: pure black `--bg #060606` / `--bg-pure #000`, plus film grain + vignette.
-- Paper cards: aged off-white `--paper #f4efe3`, dark ink `--paper-ink #1a1714`.
+- Canvas: pure black `--bg #060606`, plus a very faint film grain + vignette.
 - On-dark text: `--fg #f5f2ea`, muted via `--fg-muted / --fg-faint / --fg-ghost`.
-- Warm gold accent: `--gold #c8a25a`, `--cream #efe7d6` — for kickers, badges, quote
-  highlights, and links only. Tape `--tape`; deep dark shadows `--shadow-card`.
+- Warm gold accent: `--gold #c8a25a`, `--cream #efe7d6` — for section labels, the
+  number hover, links, blockquotes only.
+- Gold is rare so it stays powerful; build hierarchy with value / weight / spacing.
 
-Rule: gold is rare so it stays powerful. Build hierarchy with value / weight / spacing /
-rotation, not stacked color.
-
-## 3. Type (free approximations of the Adobe originals — `styles/fonts.css` + tokens)
+## 3. Type (free approximations — `styles/fonts.css` + tokens)
 
 | Role | Variable | Font |
 |---|---|---|
-| Display / poster / big numerals | `--font-display` | Anton |
-| Card names (Latin) | `--font-name` | Archivo 700+ |
-| CJK display titles | `--font-cjk-display` | Smiley Sans 得意黑 (CDN, falls back to Noto Serif SC 700) |
-| Mono: labels / dates / tags / quotes | `--font-mono` | Space Mono |
-| Serif italic accent | `--font-serif-italic` | Fraunces italic |
-| Script: masthead / notes / watermark | `--font-script` | Caveat |
-| CJK body | `--font-cjk` | Noto Serif SC |
+| Big index numerals | `--font-display` | Anton |
+| List titles (Latin) | `--font-name` | Archivo 700 |
+| Article titles (CJK) | `--font-cjk-display` | Smiley Sans 得意黑 (CDN, falls back to Noto Serif SC 700) |
+| Labels / dates / tags | `--font-mono` | Space Mono |
+| Serif italic (excerpt) | `--font-serif-italic` | Fraunces italic |
+| Script (mark / note) | `--font-script` | Caveat |
+| Body | `--font-cjk` | Noto Serif SC |
 
-Rule: monospace carries all "metadata"; display type shouts only on a few titles;
-script is for signatures and notes — sparingly.
+Monospace carries all metadata; serif carries the body for long-form readability.
 
-## 4. Signature components
+## 4. Structure
 
-- **Intro gate `IntroGate`** — aged typographic "poster" collage + a central gold seal
-  (script masthead + giant issue title + ENTER). No audio. `sessionStorage` remembers
-  entry so it doesn't replay on back-navigation.
-- **Polaroid card `PolaroidCard`** — white paper frame + dark "photo" panel (kicker +
-  display title + mono caption) + bottom white strip (date·tag + handwritten note) + tape.
-  Slight rotation, straightens and lifts on hover. `accent`: paper / cream / sepia.
-- **Pull quote `PullQuote`** — large CJK serif quote, key words gold-highlighted
-  (`q-mark`), gold quotation mark, mono citation. Measure in `rem`, never `ch`
-  (`ch` mis-computes against the small figure font under large display text).
-- **Deck `PolaroidDeck`** — fans out on scroll-in, tap to raise a card; collapses to a
-  readable vertical stack on mobile.
-- **Chrome `Chrome`** + **Footer `FooterCta`** — script masthead badge left / nav + issue
-  right; an "END OF ISSUE" closing banner at the bottom.
+- `components/WritingIndex.tsx` — the home article index (number + title + excerpt +
+  date·tag + arrow).
+- `components/Chrome.tsx` — article pages only (`minimal`): cursive mark + back link.
+- `components/Reveal.tsx` — lightweight scroll reveal (IntersectionObserver).
+- `app/writing/[slug]/page.tsx` + `styles/post.css` — dark, readable long-form page,
+  remark pipeline preserved.
+- Article frontmatter may carry optional `kicker` / `note` for the article header.
 
-## 5. Layout & motion
+## 5. Do / Don't
 
-- Desktop `MagazineFeed`: a 12-column grid of "bands" scatters cards / quotes / fragments
-  (`slot--a..h` control column span, vertical offset, rotation), with a giant script
-  watermark behind.
-- Parallax: `ScrollFx` drives `[data-parallax]` via the independent `translate` property
-  (so it never fights `transform` rotation); disabled on narrow screens / reduced motion.
-- Reveal: reuse `Reveal` (IntersectionObserver fade-and-rise).
-- Responsive: below 760px bands become a single centered column, the deck stacks
-  vertically, parallax turns off — guarantee no horizontal overflow.
-- Always honor `prefers-reduced-motion` (`styles/utilities.css`).
+Do: keep it minimal (home is just the list); keep gold rare; let mono carry metadata;
+keep the reading page readable above all; honor `prefers-reduced-motion`.
 
-## 6. Reading page (`styles/post.css`)
-
-Dark but reading-first: black background, light-ink body (`Noto Serif SC`, with contrast /
-line-height / measure tuned for long-form comfort), a polaroid-style header, and dark
-styling for blockquotes / code / links. Never trade readability for style.
-
-## 7. Content
-
-"Simple content is the best self-introduction." Keep self-statement minimal — masthead +
-one tagline, then straight into the work. Articles are the magazine "features." A few
-fragments / quotes add editorial texture but stay restrained, concrete, never generic.
-Masthead / issue strings live in `data/site-content.ts`, editable in one place.
-
-## 8. Do / Don't
-
-Do: lean on the black-canvas vs aged-paper contrast; keep gold rare; let mono carry
-metadata; give cards a slight handmade tilt; make motion breathe; keep the reading page
-readable above all.
-
-Don't: spread gold everywhere; size quotes with `ch`; let the scattered layout overflow
-horizontally on mobile; let parallax/motion interrupt reading; ignore
-`prefers-reduced-motion`; turn this back into another light portfolio template.
+Don't: add a cover / cards / modules back to the home; use a light theme; write generic
+self-statement copy; let styling compromise long-form readability.

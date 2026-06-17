@@ -53,13 +53,4 @@
     opacity: 1;
     transform: none;
   }
-
-  .deck-card {
-    transition: none;
-  }
-
-  /* parallax driver is JS-disabled under reduced motion; clear any inline offset */
-  [data-parallax] {
-    translate: none !important;
-  }
 }
