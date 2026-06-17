@@ -1,0 +1,118 @@
+.site-main {
+  position: relative;
+  z-index: 1;
+}
+
+.writing-page {
+  max-width: 920px;
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(64px, 12vh, 130px) clamp(20px, 5vw, 64px);
+}
+
+.contents-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--hair-strong);
+}
+
+.contents-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.contents-count {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-faint);
+}
+
+.contents-list {
+  margin-top: 4px;
+}
+
+.contents-item {
+  border-bottom: 1px solid var(--hair);
+}
+
+.contents-link {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto 1.5rem;
+  align-items: center;
+  gap: clamp(14px, 2.4vw, 34px);
+  padding: clamp(20px, 3vh, 30px) 0;
+  transition: background var(--dur-base) var(--ease-standard);
+}
+
+.contents-no {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--fg-ghost);
+  transition: color var(--dur-base) var(--ease-standard);
+}
+
+.contents-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contents-title {
+  font-family: var(--font-name);
+  font-weight: 700;
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  color: var(--fg);
+  transition:
+    color var(--dur-base) var(--ease-standard),
+    transform var(--dur-base) var(--ease-standard);
+}
+
+.contents-excerpt {
+  font-family: var(--font-cjk);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--fg-muted);
+  max-width: 46ch;
+}
+
+.contents-meta {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  white-space: nowrap;
+}
+
+.contents-arrow {
+  font-family: var(--font-mono);
+  color: var(--fg-faint);
+  transform: translateX(-4px);
+  transition:
+    color var(--dur-base) var(--ease-standard),
+    transform var(--dur-base) var(--ease-standard);
+}
+
+.contents-link:hover .contents-no {
+  color: var(--gold);
+}
+
+.contents-link:hover .contents-title {
+  color: var(--cream);
+  transform: translateX(4px);
+}
+
+.contents-link:hover .contents-arrow {
+  color: var(--gold);
+  transform: translateX(0);
+}

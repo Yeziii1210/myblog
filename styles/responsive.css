@@ -1,19 +1,4 @@
-/* ============ Tablet — tame the scatter ============ */
 @media (max-width: 1080px) {
-  .feed-band {
-    margin-bottom: clamp(60px, 12vh, 120px);
-  }
-
-  .slot--b { margin-top: 12vh; }
-  .slot--d { margin-top: 8vh; }
-  .slot--e { margin-top: 0; grid-column: 9 / 13; }
-  .slot--f { margin-top: 4vh; }
-  .slot--h { margin-top: 12vh; }
-
-  .feed-watermark {
-    font-size: clamp(7rem, 30vw, 18rem);
-  }
-
   .contents-link {
     grid-template-columns: 2.4rem 1fr auto;
   }
@@ -22,70 +7,7 @@
   }
 }
 
-/* ============ Mobile — single column ============ */
 @media (max-width: 760px) {
-  .feed-band {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(40px, 12vw, 70px);
-    margin-bottom: clamp(56px, 16vw, 90px);
-  }
-
-  .feed-slot {
-    width: 100%;
-    justify-content: center;
-    margin-top: 0 !important;
-  }
-
-  /* keep light character, prevent edge overflow */
-  .polaroid {
-    max-width: min(340px, 82vw);
-  }
-  .polaroid--feature {
-    max-width: min(360px, 86vw);
-  }
-
-  .pullquote {
-    max-width: min(440px, 86vw);
-    text-align: left !important;
-    margin: 0 auto;
-  }
-  .pullquote[data-align="right"] {
-    margin: 0 auto;
-  }
-
-  .feed-watermark {
-    font-size: 40vw;
-    top: 40%;
-    opacity: 0.6;
-  }
-
-  /* deck collapses to a readable vertical stack */
-  .deck-stack {
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-  .deck-card,
-  .deck[data-fanned="true"] .deck-card,
-  .deck[data-fanned="true"] .deck-card[data-active="true"] {
-    position: static;
-    width: min(320px, 84vw);
-    min-height: auto;
-    transform: rotate(-1.4deg);
-  }
-  .deck[data-fanned="true"] .deck-card:nth-child(even),
-  .deck[data-fanned="true"] .deck-card[data-active="true"]:nth-child(even) {
-    transform: rotate(1.6deg);
-  }
-
-  .contents {
-    padding-top: clamp(50px, 10vh, 90px);
-  }
   .contents-link {
     grid-template-columns: 2rem 1fr;
     gap: 12px 14px;
@@ -94,25 +16,9 @@
   .contents-meta {
     grid-column: 2;
   }
-
-  /* fewer poster tiles read better on small screens */
-  .gate-collage {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  }
-  .poster-tile {
-    min-height: 110px;
-    font-size: 1rem;
-  }
 }
 
-/* ============ Small phones ============ */
 @media (max-width: 420px) {
-  .feed-wrap {
-    padding-inline: 18px;
-  }
-  .masthead-title {
-    letter-spacing: 0.04em;
-  }
   .contents-excerpt {
     font-size: 0.82rem;
   }
