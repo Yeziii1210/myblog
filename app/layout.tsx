@@ -5,7 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteContent } from "@/data/site-content";
 
 export const metadata: Metadata = {
-  title: "yeziii",
+  title: "yeziii · 痕迹 / TRACES",
   description: siteContent.metaDescription,
   icons: {
     icon: "/assets/favicon.svg",
